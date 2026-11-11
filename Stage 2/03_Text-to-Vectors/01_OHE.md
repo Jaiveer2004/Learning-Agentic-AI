@@ -1,210 +1,360 @@
 # One-Hot Encoding (OHE)
 
-One-hot encoding converts a categorical value into a binary vector. Exactly one
-position is `1` (the position assigned to that category) and every other
-position is `0`.
+## 1. What is One-Hot Encoding?
 
-In NLP, it can represent a word, a token, or an entire document as a vector so
-that a machine-learning algorithm can work with numerical input.
+**One-Hot Encoding (OHE)** is a technique that converts categorical
+values or tokens into binary vectors containing only `0`s and `1`s.
+Exactly one position is `1`, while all other positions are `0`.
 
-## Why do we need it?
+-   **One:** Exactly one position is active (`1`).
+-   **Hot:** The active position is switched ON.
 
-Machine-learning algorithms cannot directly process text such as:
+### Example
 
-```text
-The food is good
+Suppose the vocabulary contains three programming languages:
+
+  Language   One-Hot Vector
+  ---------- ----------------
+  Python     `[1, 0, 0]`
+  Java       `[0, 1, 0]`
+  C++        `[0, 0, 1]`
+
+Each category receives a unique vector.
+
+## 2. Why Do We Need OHE?
+
+Machine Learning algorithms perform mathematical operations such as
+addition, multiplication, distance calculations, and optimization. They
+generally cannot perform these operations directly on raw text labels.
+
+Text vectorization converts text or categories into numerical
+representations that models can process.
+
+OHE is one simple way to do this.
+
+### Main reasons
+
+1.  **Numerical representation:** Converts categorical values into
+    numbers that ML algorithms can process.
+2.  **Avoids artificial ordering:** Does not imply that one category is
+    greater than another.
+3.  **Unique representation:** Gives every category its own distinct
+    vector.
+4.  **Supports mathematical operations:** Encoded values can be used as
+    model inputs.
+
+### Why not simply assign numbers?
+
+Consider this encoding:
+
+  Language     Label
+  ---------- -------
+  Python           1
+  Java             2
+  C++              3
+
+A model might interpret these numbers as ordered or assume meaningful
+distances between them. But programming languages do not have this
+numerical ordering.
+
+OHE avoids that implication:
+
+  Language   One-Hot Vector
+  ---------- ----------------
+  Python     `[1, 0, 0]`
+  Java       `[0, 1, 0]`
+  C++        `[0, 0, 1]`
+
+## 3. OHE in NLP: A Worked Example
+
+Suppose a corpus contains these documents:
+
+``` text
+Document 1: I love Python.
+Document 2: I love Java.
+Document 3: Python is amazing.
 ```
 
-OHE converts text into numbers without assigning an artificial order to words.
-For example, assigning `food = 1`, `pizza = 2`, and `burger = 3` would wrongly
-suggest that `burger` is greater than `pizza`. One-hot vectors do not introduce
-this false ordering.
+### Step 1: Create the vocabulary
 
-## Vocabulary and vector representation
+Extract the unique tokens:
 
-The **vocabulary** is the set of unique words in the corpus. Suppose the
-corpus is:
-
-| Document | Text | Output |
-|---|---|---:|
-| D1 | `The food is good` | 1 |
-| D2 | `The food is bad` | 0 |
-| D3 | `Pizza is amazing` | 1 |
-| D4 | `Burger is bad` | 0 |
-
-After tokenization and normalization, the vocabulary might be:
-
-```text
-["the", "food", "is", "good", "bad", "pizza", "amazing"]
+``` python
+vocabulary = [
+    "I",
+    "love",
+    "Python",
+    "Java",
+    "is",
+    "amazing"
+]
 ```
 
-The vocabulary has size 7, so each word is represented by a vector of length
-7:
+Vocabulary size = **6**.
 
-```text
-the     -> [1, 0, 0, 0, 0, 0, 0]
-food    -> [0, 1, 0, 0, 0, 0, 0]
-good    -> [0, 0, 0, 1, 0, 0, 0]
+### Step 2: Assign each token a position
+
+    Index Token
+  ------- ---------
+        0 I
+        1 love
+        2 Python
+        3 Java
+        4 is
+        5 amazing
+
+### Step 3: Create one-hot vectors
+
+  Token     One-Hot Vector
+  --------- ----------------------
+  I         `[1, 0, 0, 0, 0, 0]`
+  love      `[0, 1, 0, 0, 0, 0]`
+  Python    `[0, 0, 1, 0, 0, 0]`
+  Java      `[0, 0, 0, 1, 0, 0]`
+  is        `[0, 0, 0, 0, 1, 0]`
+  amazing   `[0, 0, 0, 0, 0, 1]`
+
+**Important:** The length of every one-hot vector equals the vocabulary
+size.
+
+If the vocabulary has 6 unique tokens, each vector has 6 positions. If
+it has 10,000 unique tokens, each vector has 10,000 positions.
+
+### Step 4: Represent a sentence
+
+Sentence:
+
+``` text
+I love Python
 ```
 
-The position of a `1` is determined by the vocabulary index. The index must be
-kept consistent between training and inference.
+Its one-hot representation is a matrix containing one row per token:
 
-## Document-level OHE
+$$
+\begin{bmatrix}
+1&0&0&0&0&0\\
+0&1&0&0&0&0\\
+0&0&1&0&0&0
+\end{bmatrix}
+$$
 
-A document can be represented by combining the one-hot vectors of its words.
-For example, with the vocabulary above:
+A single token is represented by a vector; a sequence of tokens can
+therefore be represented by a matrix.
 
-```text
-"The food is good" -> [1, 1, 1, 1, 0, 0, 0]
-"Pizza is amazing" -> [0, 0, 1, 0, 0, 1, 1]
+## 4. Understanding OHE Mathematically
+
+Consider two one-hot vectors:
+
+$$
+A = [1, 0, 0]
+$$
+
+$$
+B = [0, 1, 0]
+$$
+
+Their dot product is:
+
+$$
+A \cdot B = (1 \times 0) + (0 \times 1) + (0 \times 0) = 0
+$$
+
+Different one-hot vectors are orthogonal: their dot product is zero.
+
+This means OHE does not encode semantic similarity between categories.
+For example, it does not know that Python and Java are both programming
+languages.
+
+## 5. Implementing OHE with Python
+
+Scikit-learn provides `OneHotEncoder` for encoding categorical features.
+
+### Install
+
+``` bash
+pip install scikit-learn
 ```
 
-This produces a document-term matrix whose shape is:
+### Example
 
-```text
-(number of documents, vocabulary size)
-```
-
-The exact representation depends on the chosen convention. A binary
-document-level representation records whether a word is present (`1`) or
-absent (`0`); it does not record how many times the word occurs. For example,
-`"good good food"` still has `good = 1` in binary OHE. Count-based
-representations such as Bag of Words are more suitable when frequency matters.
-
-## Numerical example
-
-For the vocabulary `["food", "pizza", "burger"]`:
-
-| Word | food | pizza | burger |
-|---|---:|---:|---:|
-| food | 1 | 0 | 0 |
-| pizza | 0 | 1 | 0 |
-| burger | 0 | 0 | 1 |
-
-These vectors are orthogonal: the dot product between two different words is
-0. Therefore, basic OHE does not express semantic similarity. The words
-`good` and `excellent` are just as unrelated numerically as `good` and
-`pizza`, even if their meanings are similar.
-
-## Categorical-data example
-
-OHE is also commonly used for ordinary categorical features:
-
-```text
-Colour: ["red", "blue", "green"]
-
-red   -> [1, 0, 0]
-blue  -> [0, 1, 0]
-green -> [0, 0, 1]
-```
-
-For a category with `k` possible values, the one-hot vector has `k` columns.
-For many categories, one column can be omitted (`drop="first"`) in a linear
-model to avoid perfect multicollinearity. Do not do this automatically when
-you need the complete, directly interpretable encoding.
-
-## Python implementation
-
-### Manual implementation
-
-```python
-vocabulary = {"food": 0, "pizza": 1, "burger": 2}
-
-def one_hot(word: str) -> list[int]:
-    vector = [0] * len(vocabulary)
-    if word in vocabulary:
-        vector[vocabulary[word]] = 1
-    return vector
-
-one_hot("pizza")  # [0, 1, 0]
-```
-
-For production code, an unknown word should be handled deliberately. It can be
-mapped to an `<UNK>` token, ignored, or rejected with a clear error; silently
-returning an all-zero vector can hide data-quality problems.
-
-### Scikit-learn
-
-For categorical values:
-
-```python
+``` python
+import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 
-encoder = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
-encoded = encoder.fit_transform([["red"], ["blue"], ["green"]])
+languages = np.array([
+    ["Python"],
+    ["Java"],
+    ["C++"],
+    ["Python"],
+    ["Java"]
+])
 
+encoder = OneHotEncoder(sparse_output=False)
+
+encoded_data = encoder.fit_transform(languages)
+
+print(encoded_data)
 print(encoder.categories_)
-print(encoded)
 ```
 
-`handle_unknown="ignore"` makes an unseen category all zeros at transform time.
-The encoder should be fitted on the training data only and reused for
-validation, test, and production data:
+The exact column order is determined by the categories learned by the
+encoder.
 
-```python
-encoder.fit(train_categories)
-train_encoded = encoder.transform(train_categories)
-test_encoded = encoder.transform(test_categories)
+### Understanding the methods
+
+-   `fit()`: Learns the categories from the data.
+-   `transform()`: Converts categories into one-hot vectors.
+-   `fit_transform()`: Performs both operations.
+
+**ML practice:** Fit the encoder on training data, then use that same
+fitted encoder to transform validation and test data. Do not
+independently fit it on each dataset; that can produce inconsistent
+columns and data leakage.
+
+> Compatibility note: In older scikit-learn versions, use
+> `OneHotEncoder(sparse=False)` instead of `sparse_output=False`.
+
+## 6. Limitations of One-Hot Encoding
+
+### 6.1 High dimensionality
+
+The vector length equals the number of unique categories or tokens.
+
+For a vocabulary of 50,000 tokens, every one-hot vector has 50,000
+positions.
+
+This can create large feature spaces.
+
+### 6.2 Sparse representation
+
+A one-hot vector contains exactly one `1` and all remaining positions
+are `0`.
+
+For a vocabulary of 50,000 tokens:
+
+-   1 position contains `1`.
+-   49,999 positions contain `0`.
+
+This is called a **sparse representation**.
+
+### 6.3 No semantic meaning
+
+Consider:
+
+``` text
+King   -> [1, 0, 0, 0]
+Queen  -> [0, 1, 0, 0]
+Apple  -> [0, 0, 1, 0]
+Car    -> [0, 0, 0, 1]
 ```
 
-For a text corpus, `CountVectorizer(binary=True)` is usually more convenient
-than manually creating one vector per token:
+OHE treats each token as a separate category. It does not capture
+relationships such as:
 
-```python
-from sklearn.feature_extraction.text import CountVectorizer
+-   King and Queen are related.
+-   Apple and Banana are related.
+-   Car and Bus are related.
 
-texts = ["the food is good", "the food is bad", "pizza is amazing"]
-vectorizer = CountVectorizer(binary=True)
-matrix = vectorizer.fit_transform(texts)
+In terms of dot product, all distinct one-hot vectors are equally
+dissimilar.
 
-print(vectorizer.get_feature_names_out())
-print(matrix.toarray())
-```
+This is one reason dense word embeddings are useful.
 
-The result is a sparse document-term matrix. `binary=True` records presence or
-absence; without it, the matrix stores token counts and is a Bag-of-Words
-representation rather than strict binary OHE.
+## 7. OHE vs Bag of Words vs Word Embeddings
 
-## Advantages
+These techniques all represent text numerically, but they do different
+jobs.
 
-1. **Simple and intuitive:** each dimension has a clear category/word meaning.
-2. **Easy to implement:** it is available in libraries such as
-   `OneHotEncoder` and `CountVectorizer`.
-3. **Fixed-size input:** once the vocabulary is fixed, every input has the same
-   number of features and can be passed to an ML algorithm.
-4. **No artificial ordinal relationship:** categories are not treated as
-   numerically ordered.
-5. **Useful baseline:** it works well for small vocabularies and simple
-   classification or regression problems.
+  -------------------------------------------------------------------------
+  Parameter         One-Hot Encoding    Bag of Words      Word Embeddings
+                                        (BoW)             
+  ----------------- ------------------- ----------------- -----------------
+  Represents        Individual          A document using  Tokens using
+                    categories/tokens   token counts      dense vectors
 
-## Disadvantages and edge cases
+  Output            Binary vector       Frequency vector  Dense numerical
+                                                          vector
 
-1. **Sparse, high-dimensional vectors:** a large vocabulary creates mostly-zero
-   matrices, increasing memory and computation cost. Keep these matrices sparse
-   where possible.
-2. **Vocabulary-size dependency:** adding words increases the number of
-   features. A vocabulary of 100,000 words creates 100,000 dimensions.
-3. **No semantic meaning:** similar words do not receive similar vectors.
-4. **No word-order information:** `"dog bites man"` and `"man bites dog"`
-   contain the same words and can receive the same binary representation.
-5. **Out-of-vocabulary (OOV) words:** a word absent from the training
-   vocabulary has no known column. Use an `<UNK>` token or an explicit unknown
-   handling strategy.
-6. **Possible overfitting:** many features and relatively few training
-   examples can make a model memorize the training data.
-7. **Repeated words are collapsed in binary form:** frequency information is
-   lost. Use counts or TF-IDF when frequency is important.
+  Captures          No                  Yes               Not directly
+  frequency?                                              
 
-## OHE compared with other text representations
+  Captures semantic No                  No                Can capture them
+  relationships?                                          
 
-| Representation | Main idea | Semantic similarity | Word order |
-|---|---|---:|---:|
-| One-hot encoding | One active position per category/token | No | No |
-| Bag of Words | Token counts or binary presence | No | No |
-| TF-IDF | Frequency weighted by document rarity | No | No |
-| Word2Vec / other embeddings | Dense learned vectors | Yes, approximately | Limited/context-dependent |
+  Typical           Sparse              Sparse            Dense
+  representation                                          
+  -------------------------------------------------------------------------
 
-OHE is therefore a useful introductory and baseline technique, but large NLP
-systems generally use TF-IDF, embeddings, or contextual language-model
-representations when sparsity and meaning become important.
+### Key distinction
+
+-   **OHE:** Gives each token or category its own binary vector.
+-   **BoW:** Combines token counts into one document-level vector.
+-   **Word Embeddings:** Learn dense vector representations that can
+    capture semantic and syntactic relationships.
+
+## 8. Important Terms
+
+  -----------------------------------------------------------------------
+  Term                                Meaning
+  ----------------------------------- -----------------------------------
+  Vocabulary                          Collection of unique tokens
+
+  One-Hot Encoding                    One position ON, all others OFF
+
+  Vector                              Ordered numerical representation
+
+  Sparse vector                       A vector containing mostly zeros
+
+  Dimensionality                      Number of positions/features in a
+                                      vector
+
+  Word embeddings                     Dense vectors that can capture
+                                      semantic relationships
+  -----------------------------------------------------------------------
+
+## 9. The Three Things You Should Write in Your Notes
+
+1.  **One-Hot Encoding (OHE):** Converts categorical values or tokens
+    into binary vectors, with exactly one `1` and all other positions
+    `0`.
+2.  **Why use OHE?** Converts categories into numerical representations
+    and avoids artificial numerical ordering.
+3.  **Limitations:** High dimensionality, sparse vectors, and no
+    semantic understanding of relationships between words.
+
+### Quick revision
+
+-   Vector length = vocabulary size.
+-   One category/token = one unique one-hot vector.
+-   Different one-hot vectors have a dot product of zero.
+-   OHE represents identity, not meaning.
+
+## 10. Knowledge Check
+
+Try answering these questions without looking at the notes.
+
+1.  Why do we convert text into numerical vectors?
+2.  If the vocabulary contains 5 unique tokens, what is the length of
+    each one-hot vector?
+3.  What does "one-hot" mean?
+4.  What is the main semantic limitation of OHE?
+5.  What happens to vector dimensionality when vocabulary size
+    increases?
+
+### Answers
+
+1.  ML models need numerical representations for mathematical
+    operations.
+2.  5 positions.
+3.  Exactly one position is `1`; all others are `0`.
+4.  OHE does not capture semantic relationships between words.
+5.  Vector dimensionality increases because vector length equals
+    vocabulary size.
+
+------------------------------------------------------------------------
+
+## Final Takeaway
+
+**We convert text into numbers so that machines can perform mathematical
+operations on language. OHE is one of the simplest ways to represent
+categorical values or individual tokens numerically.**
