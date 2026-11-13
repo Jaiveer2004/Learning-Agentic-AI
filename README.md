@@ -2,8 +2,9 @@
 
 A practical learning repository covering the foundations used to build
 generative-AI and agentic applications with Python. The material progresses
-from Python project setup and APIs to data engineering, NLP preprocessing, and
-text vectorization.
+from Python project setup and APIs to data engineering, NLP preprocessing,
+text vectorization, and the deep-learning architectures behind modern
+language models.
 
 ## Repository roadmap
 
@@ -32,20 +33,43 @@ text vectorization.
   - CSV files contain raw customer and transaction data, including orphan
     transactions for data-quality exercises.
 
-### Stage 2 - Natural language processing
+### Stage 3 - NLP and deep-learning foundations
 
 - **Text preprocessing 1**:
   - tokenization
   - stemming
   - lemmatization
 - **Text preprocessing 2**:
-  - additional preprocessing exercises
+  - preprocessing exercises
   - part-of-speech tagging
   - named-entity recognition
 - **Text-to-vectors**:
   - one-hot encoding
   - Bag of Words
-  - an NLP reference PDF
+  - n-grams
+  - TF-IDF
+  - word embeddings
+  - Word2Vec
+- **Encoder-Decoder**:
+  - neural-network and ANN foundations
+  - Simple RNN, LSTM, GRU, and Bidirectional RNN
+  - synchronized and encoder-decoder Many-to-Many architectures
+  - Seq2Seq encoder, context vector, decoder, and training workflow
+  - teacher forcing, beam search, and context-vector bottlenecks
+- **Attention Mechanism**:
+  - attention scores, weights, and context vectors
+  - additive and multiplicative attention
+  - Query, Key, and Value representations
+  - scaled dot-product and multi-head attention
+  - self-attention, masked attention, and cross-attention
+  - positional encoding, padding masks, causal masks, KV cache, MQA,
+    and GQA
+- **Transformers**:
+  - Transformer encoder and decoder architecture
+  - token embeddings and positional information
+  - residual connections, layer normalization, and feed-forward networks
+  - encoder-only, decoder-only, and encoder-decoder models
+  - autoregressive generation and Transformer implementation with PyTorch
 
 ## Directory structure
 
@@ -60,11 +84,28 @@ text vectorization.
 │   │   ├── Project_Pandas.ipynb
 │   │   └── Project_Polars.ipynb
 │   └── Numpy/
-└── Stage 2/
+└── Stage 3/
     ├── 01_Text-Pre-Processing-1/
     ├── 02_Text-Pre-Processing-2/
-    └── 03_Text-to-Vectors/
+    ├── 03_Text-to-Vectors/
+    ├── 04_Encoder-Decoder/
+    ├── 05_Attention-Mechanism/
+    └── 06_Transformers/
 ```
+
+### Stage 3 reading order
+
+The Markdown guides are intended to be studied in this order:
+
+1. [Text-to-Vectors](<Stage 3/03_Text-to-Vectors/>)
+2. [Encoder-Decoder and Seq2Seq](<Stage 3/04_Encoder-Decoder/>)
+3. [Attention Mechanism](<Stage 3/05_Attention-Mechanism/>)
+4. [Transformers](<Stage 3/06_Transformers/>)
+
+The Encoder-Decoder section builds the recurrent and Seq2Seq foundation.
+The Attention section then explains how models learn which representations
+to prioritize. The Transformer section combines those ideas into the
+attention-first architecture used by modern language models.
 
 The repository also contains local virtual environments used during
 development. They are not part of the learning material and should not be
@@ -153,6 +194,13 @@ By working through the stages, you will practice:
 5. Comparing Pandas and Polars data-processing workflows.
 6. Preparing text for machine-learning pipelines.
 7. Converting text into numerical representations for downstream models.
+8. Understanding how RNN-based encoder-decoder systems process sequences.
+9. Explaining attention mathematically using Q, K, V, scores, weights, and
+   context vectors.
+10. Understanding Transformer encoders, decoders, masking, positional
+    encoding, and autoregressive generation.
+11. Implementing scaled dot-product attention and Transformer components
+    with PyTorch.
 
 ## Notes
 
@@ -161,3 +209,7 @@ By working through the stages, you will practice:
 - Dataset files and SQLite databases are included for reproducibility and API
   practice.
 - Dependency lock files are retained for the `uv`-managed Stage 0 projects.
+- The Stage 3 Markdown guides include local diagrams in each topic's `images/`
+  directory so they render reliably in repository previews.
+- Equations use Markdown-compatible LaTeX display blocks, and implementation
+  examples use fenced Python code blocks for readable previews.
